@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ยืนยันการลบ - เว็บแอปรายรับ-รายจ่าย{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-danger text-white text-center py-3">
+                    <h4 class="mb-0">ยืนยันการลบ</h4>
+                </div>
+                <div class="card-body p-4 text-center">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h5 class="mb-3">คุณต้องการลบรายการนี้หรือไม่?</h5>
+                    
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <p><strong>หมวดหมู่:</strong> {{ transaction.category.name }}</p>
+                            <p><strong>จำนวนเงิน:</strong> {{ transaction.amount|floatformat:2 }} บาท</p>
+                            <p><strong>รายละเอียด:</strong> {{ transaction.description|default:"-" }}</p>
+                            <p><strong>วันที่:</strong> {{ transaction.date|date:"d/m/Y" }}</p>
+                        </div>
+                    </div>
+                    
+                    <p class="text-muted">การดำเนินการนี้ไม่สามารถยกเลิกได้</p>
+                    
+                    <form method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger me-2">ยืนยันการลบ</button>
+                        <a href="{% url 'transactions' %}" class="btn btn-secondary">ยกเลิก</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

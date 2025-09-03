@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}รายงาน - เว็บแอปรายรับ-รายจ่าย{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">รายงานการเงิน</h1>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">เลือกช่วงเวลา</h6>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">วันที่เริ่มต้น</label>
+                            <input type="date" name="start_date" class="form-control" value="{{ start_date|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">วันที่สิ้นสุด</label>
+                            <input type="date" name="end_date" class="form-control" value="{{ end_date|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">อัปเดตรายงาน</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                รายรับรวม
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_income|floatformat:2 }} บาท
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-arrow-up fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                รายจ่ายรวม
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_expense|floatformat:2 }} บาท
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-arrow-down fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                ยอดคงเหลือ
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_income|add:total_expense|floatformat:2 }} บาท
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-balance-scale fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <!-- Income by Category -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">รายรับตามหมวดหมู่</h6>
+                </div>
+                <div class="card-body">
+                    {% if income_by_category %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>หมวดหมู่</th>
+                                        <th>จำนวนเงิน</th>
+                                        <th>เปอร์เซ็นต์</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in income_by_category %}
+                                    <tr>
+                                        <td>{{ item.category__name }}</td>
+                                        <td class="text-success">{{ item.total|floatformat:2 }} บาท</td>
+                                        <td>
+                                            {% if total_income > 0 %}
+                                                {% widthratio item.total total_income 100 %}%
+                                            {% else %}
+                                                0%
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-chart-pie fa-3x text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">ไม่มีข้อมูลรายรับในช่วงเวลาที่เลือก</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Expense by Category -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">รายจ่ายตามหมวดหมู่</h6>
+                </div>
+                <div class="card-body">
+                    {% if expense_by_category %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>หมวดหมู่</th>
+                                        <th>จำนวนเงิน</th>
+                                        <th>เปอร์เซ็นต์</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in expense_by_category %}
+                                    <tr>
+                                        <td>{{ item.category__name }}</td>
+                                        <td class="text-danger">{{ item.total|floatformat:2 }} บาท</td>
+                                        <td>
+                                            {% if total_expense > 0 %}
+                                                {% widthratio item.total total_expense 100 %}%
+                                            {% else %}
+                                                0%
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-chart-pie fa-3x text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">ไม่มีข้อมูลรายจ่ายในช่วงเวลาที่เลือก</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Trend -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">แนวโน้มรายเดือน (6 เดือนล่าสุด)</h6>
+                </div>
+                <div class="card-body">
+                    {% if monthly_data %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>เดือน</th>
+                                        <th>รายรับ</th>
+                                        <th>รายจ่าย</th>
+                                        <th>ยอดคงเหลือ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for month in monthly_data %}
+                                    <tr>
+                                        <td>{{ month.month }}</td>
+                                        <td class="text-success">{{ month.income|floatformat:2 }} บาท</td>
+                                        <td class="text-danger">{{ month.expense|floatformat:2 }} บาท</td>
+                                        <td class="{% if month.balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                            {{ month.balance|floatformat:2 }} บาท
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-chart-line fa-3x text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">ไม่มีข้อมูลแนวโน้มรายเดือน</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

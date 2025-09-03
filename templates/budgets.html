@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}จัดการงบประมาณ - เว็บแอปรายรับ-รายจ่าย{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">จัดการงบประมาณ</h1>
+    </div>
+
+    <div class="row">
+        <!-- Add Budget Form -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">เพิ่มงบประมาณใหม่</h6>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.category.id_for_label }}" class="form-label">หมวดหมู่</label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.category.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.amount.id_for_label }}" class="form-label">จำนวนเงิน</label>
+                            {{ form.amount }}
+                            {% if form.amount.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.amount.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.month.id_for_label }}" class="form-label">เดือน</label>
+                            {{ form.month }}
+                            {% if form.month.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.month.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">เพิ่มงบประมาณ</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budgets List -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">งบประมาณทั้งหมด</h6>
+                </div>
+                <div class="card-body">
+                    {% if budgets %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>หมวดหมู่</th>
+                                        <th>จำนวนเงิน</th>
+                                        <th>เดือน</th>
+                                        <th>วันที่สร้าง</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for budget in budgets %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge" style="background-color: {{ budget.category.color }};">
+                                                <i class="{{ budget.category.icon }} me-1"></i>
+                                                {{ budget.category.name }}
+                                            </span>
+                                        </td>
+                                        <td class="{% if budget.category.type == 'income' %}text-success{% else %}text-danger{% endif %}">
+                                            {{ budget.amount|floatformat:2 }} บาท
+                                        </td>
+                                        <td>{{ budget.month|date:"F Y" }}</td>
+                                        <td>{{ budget.created_at|date:"d/m/Y H:i" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-piggy-bank fa-3x text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">ยังไม่มีงบประมาณใดๆ</p>
+                            <p class="text-muted">เพิ่มงบประมาณแรกของคุณเพื่อเริ่มต้นวางแผนการเงิน</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Tips -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">เคล็ดลับการตั้งงบประมาณ</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-percentage fa-2x text-primary mb-2"></i>
+                                <h6>50/30/20 Rule</h6>
+                                <p class="small text-muted">50% สำหรับความต้องการจำเป็น, 30% สำหรับความต้องการ, 20% สำหรับการออม</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
+                                <h6>ติดตามอย่างสม่ำเสมอ</h6>
+                                <p class="small text-muted">ตรวจสอบงบประมาณของคุณเป็นประจำเพื่อให้อยู่ในกรอบที่กำหนด</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <i class="fas fa-adjust fa-2x text-warning mb-2"></i>
+                                <h6>ปรับปรุงอย่างต่อเนื่อง</h6>
+                                <p class="small text-muted">ปรับงบประมาณตามสถานการณ์และเป้าหมายที่เปลี่ยนแปลง</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

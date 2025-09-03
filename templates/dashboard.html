@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Income-Expense Web App{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header with cute styling -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div class="page-header-content">
+            <h1 class="h2 mb-2 text-gradient fw-bold">
+                <i class="fas fa-tachometer-alt me-3 animate-pulse" style="color: var(--cute-pink);"></i>
+                <span class="cute-decoration position-relative">Dashboard</span>
+            </h1>
+            <p class="text-muted fs-5 mb-0">Welcome back! Here's your financial overview ✨</p>
+        </div>
+        <a href="{% url 'add_transaction' %}" class="d-none d-sm-inline-block btn btn-primary shadow-sm quick-action-btn">
+            <i class="fas fa-plus fa-sm me-2"></i>Add New Transaction
+        </a>
+    </div>
+
+    <!-- Summary Cards with enhanced styling -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-4 col-lg-6 col-md-6">
+            <div class="stats-card border-left-primary position-relative overflow-hidden">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="stats-label d-flex align-items-center">
+                            <i class="fas fa-calendar-alt me-2" style="color: var(--cute-pink);"></i>
+                            <span>Income - {{ current_month }}</span>
+                        </div>
+                        <div class="stats-value text-success d-flex align-items-center flex-wrap">
+                            <span>{{ total_income|floatformat:2 }} ฿</span>
+                            <i class="fas fa-trending-up ms-2 animate-bounce d-none d-sm-inline"></i>
+                        </div>
+                    </div>
+                    <div class="col-auto d-none d-md-block">
+                        <div class="stats-icon-container">
+                            <i class="fas fa-arrow-up fa-2x" style="color: var(--cute-pink); opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-6 col-md-6">
+            <div class="stats-card border-left-danger position-relative overflow-hidden">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="stats-label d-flex align-items-center">
+                            <i class="fas fa-calendar-alt me-2" style="color: var(--cute-pink-dark);"></i>
+                            <span>Expenses - {{ current_month }}</span>
+                        </div>
+                        <div class="stats-value text-danger d-flex align-items-center flex-wrap">
+                            <span>{{ total_expense|floatformat:2 }} ฿</span>
+                            <i class="fas fa-trending-down ms-2 animate-bounce d-none d-sm-inline"></i>
+                        </div>
+                    </div>
+                    <div class="col-auto d-none d-md-block">
+                        <div class="stats-icon-container">
+                            <i class="fas fa-arrow-down fa-2x" style="color: var(--cute-pink-dark); opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-lg-12 col-md-12">
+            <div class="stats-card border-left-info position-relative overflow-hidden">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="stats-label d-flex align-items-center">
+                            <i class="fas fa-balance-scale me-2" style="color: var(--cute-pink);"></i>
+                            <span>Balance</span>
+                        </div>
+                        <div class="stats-value {% if balance >= 0 %}text-success{% else %}text-danger{% endif %} d-flex align-items-center flex-wrap">
+                            <span>{{ balance|floatformat:2 }} ฿</span>
+                            {% if balance >= 0 %}
+                                <i class="fas fa-smile ms-2 animate-pulse d-none d-sm-inline" style="color: var(--cute-pink);"></i>
+                            {% else %}
+                                <i class="fas fa-frown ms-2 animate-pulse d-none d-sm-inline" style="color: var(--cute-pink-dark);"></i>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-auto d-none d-md-block">
+                        <div class="stats-icon-container">
+                            <i class="fas fa-balance-scale fa-2x" style="color: var(--cute-pink); opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Add Transaction with cute styling -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold d-flex align-items-center flex-wrap">
+                        <i class="fas fa-magic me-2 animate-pulse"></i>
+                        <span>Quick Add Transaction</span>
+                        <span class="ms-auto badge d-none d-sm-inline" style="background: rgba(255,255,255,0.2); color: white; font-size: 0.7rem;">Fast & Easy!</span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'add_transaction' %}">
+                        {% csrf_token %}
+                        <div class="row g-2">
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <label class="form-label fw-semibold text-muted small">Category</label>
+                                <select name="category" class="form-control" required>
+                                    <option value="">🏷️ Select Category</option>
+                                    {% for category in categories %}
+                                        <option value="{{ category.id }}" data-type="{{ category.type }}">
+                                            {{ category.name }} ({{ category.get_type_display }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <label class="form-label fw-semibold text-muted small">Amount</label>
+                                <input type="number" name="amount" class="form-control" placeholder="💰 Enter amount" step="0.01" required>
+                            </div>
+                            <div class="col-lg-4 col-md-8 col-12">
+                                <label class="form-label fw-semibold text-muted small">Description</label>
+                                <input type="text" name="description" class="form-control" placeholder="📝 Add a note (optional)">
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-12">
+                                <label class="form-label d-none d-md-block">&nbsp;</label>
+                                <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-plus me-2"></i>Add
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions with enhanced styling -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold d-flex align-items-center">
+                        <i class="fas fa-clock me-2 animate-pulse"></i>
+                        <span>Recent Transactions</span>
+                        <span class="ms-2 badge d-none d-sm-inline" style="background: rgba(255,255,255,0.2); color: white; font-size: 0.7rem;">Latest Activity</span>
+                    </h6>
+                    <a href="{% url 'transactions' %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-external-link-alt me-1"></i><span class="d-none d-sm-inline">View All</span>
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_transactions %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-calendar me-1 d-none d-sm-inline"></i>Date</th>
+                                        <th><i class="fas fa-tag me-1 d-none d-sm-inline"></i>Category</th>
+                                        <th class="d-none d-md-table-cell"><i class="fas fa-comment me-1"></i>Description</th>
+                                        <th><i class="fas fa-coins me-1 d-none d-sm-inline"></i>Amount</th>
+                                        <th class="d-none d-lg-table-cell"><i class="fas fa-exchange-alt me-1"></i>Type</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transaction in recent_transactions %}
+                                    <tr class="transaction-row">
+                                        <td class="fw-semibold small">{{ transaction.date|date:"d/m/Y" }}</td>
+                                        <td>
+                                            <span class="badge d-flex align-items-center" style="background-color: {{ transaction.category.color }}; max-width: fit-content; font-size: 0.65rem;">
+                                                <i class="{{ transaction.category.icon }} me-1"></i>
+                                                <span class="d-none d-sm-inline">{{ transaction.category.name }}</span>
+                                            </span>
+                                        </td>
+                                        <td class="text-muted small d-none d-md-table-cell">{{ transaction.description|default:"📝 No description" }}</td>
+                                        <td class="{% if transaction.is_income %}text-success{% else %}text-danger{% endif %} fw-bold">
+                                            <span class="d-none d-sm-inline">
+                                                {% if transaction.is_income %}💰{% else %}💸{% endif %}
+                                            </span>
+                                            <small>{{ transaction.amount|floatformat:2 }} ฿</small>
+                                        </td>
+                                        <td class="d-none d-lg-table-cell">
+                                            <span class="badge {% if transaction.is_income %}bg-success{% else %}bg-danger{% endif %} d-flex align-items-center" style="max-width: fit-content; font-size: 0.65rem;">
+                                                {% if transaction.is_income %}
+                                                    <i class="fas fa-arrow-up me-1"></i>
+                                                {% else %}
+                                                    <i class="fas fa-arrow-down me-1"></i>
+                                                {% endif %}
+                                                {{ transaction.category.get_type_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <div class="empty-state">
+                                <i class="fas fa-piggy-bank fa-4x mb-3" style="color: var(--cute-pink); opacity: 0.6;"></i>
+                                <h5 class="text-muted mb-3">🎉 Ready to Start Your Financial Journey?</h5>
+                                <p class="text-muted mb-4 small">No transactions yet, but that's about to change! Add your first transaction to see the magic happen ✨</p>
+                                <a href="{% url 'add_transaction' %}" class="btn btn-primary quick-action-btn">
+                                    <i class="fas fa-rocket me-2"></i>Add Your First Transaction
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions with enhanced cute styling -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold d-flex align-items-center">
+                        <i class="fas fa-rocket me-2 animate-bounce"></i>Quick Actions
+                        <span class="ms-auto badge" style="background: rgba(255,255,255,0.2); color: white; font-size: 0.7rem;">Power Tools ⚡</span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+                            <a href="{% url 'add_transaction' %}" class="btn btn-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3 quick-action-btn position-relative">
+                                <i class="fas fa-plus fa-2x mb-2"></i>
+                                <span class="fs-6 fw-bold">Add Transaction</span>
+                                <small class="text-white-50 mt-1 d-none d-sm-block">💰 Record income/expense</small>
+                            </a>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+                            <a href="{% url 'transactions' %}" class="btn btn-info w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3 quick-action-btn">
+                                <i class="fas fa-list fa-2x mb-2"></i>
+                                <span class="fs-6 fw-bold">View All</span>
+                                <small class="text-white-50 mt-1 d-none d-sm-block">📄 Browse transactions</small>
+                            </a>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+                            <a href="{% url 'categories' %}" class="btn btn-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3 quick-action-btn">
+                                <i class="fas fa-tags fa-2x mb-2"></i>
+                                <span class="fs-6 fw-bold">Categories</span>
+                                <small class="text-white-50 mt-1 d-none d-sm-block">🏷️ Organize & manage</small>
+                            </a>
+                        </div>
+                        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+                            <a href="{% url 'reports' %}" class="btn btn-success w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3 quick-action-btn">
+                                <i class="fas fa-chart-line fa-2x mb-2"></i>
+                                <span class="fs-6 fw-bold">Reports</span>
+                                <small class="text-white-50 mt-1 d-none d-sm-block">📈 Financial insights</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

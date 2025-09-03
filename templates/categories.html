@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}จัดการหมวดหมู่ - เว็บแอปรายรับ-รายจ่าย{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">จัดการหมวดหมู่</h1>
+    </div>
+
+    <div class="row">
+        <!-- Add Category Form -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">เพิ่มหมวดหมู่ใหม่</h6>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">ชื่อหมวดหมู่</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.type.id_for_label }}" class="form-label">ประเภท</label>
+                            {{ form.type }}
+                            {% if form.type.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.type.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.color.id_for_label }}" class="form-label">สี</label>
+                            {{ form.color }}
+                            {% if form.color.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.color.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.icon.id_for_label }}" class="form-label">ไอคอน (FontAwesome)</label>
+                            {{ form.icon }}
+                            <small class="form-text text-muted">เช่น: fas fa-home, fas fa-car, fas fa-utensils</small>
+                            {% if form.icon.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.icon.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">เพิ่มหมวดหมู่</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories List -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">หมวดหมู่ทั้งหมด</h6>
+                </div>
+                <div class="card-body">
+                    {% if categories %}
+                        <div class="row">
+                            {% for category in categories %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="{{ category.icon }} fa-2x" style="color: {{ category.color }};"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">{{ category.name }}</h6>
+                                                <span class="badge {% if category.type == 'income' %}bg-success{% else %}bg-danger{% endif %}">
+                                                    {{ category.get_type_display }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-tags fa-3x text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">ยังไม่มีหมวดหมู่ใดๆ</p>
+                            <p class="text-muted">เพิ่มหมวดหมู่แรกของคุณเพื่อเริ่มต้นใช้งาน</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
