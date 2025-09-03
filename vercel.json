@@ -3,7 +3,11 @@
     "builds": [
         {
             "src": "webappincome/wsgi.py",
-            "use": "@vercel/python"
+            "use": "@vercel/python",
+            "config": {
+                "maxLambdaSize": "15mb",
+                "runtime": "python3.9"
+            }
         },
         {
             "src": "build_files.sh",
@@ -22,5 +26,9 @@
             "src": "/(.*)",
             "dest": "webappincome/wsgi.py"
         }
-    ]
+    ],
+    "env": {
+        "VERCEL_ENV": "production",
+        "DATABASE_URL": "postgresql://postgres.jcycobkzohrufmonwtko:0954852404@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
+    }
 }

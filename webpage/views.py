@@ -47,27 +47,38 @@ def user_logout(request):
 
 @login_required
 def dashboard(request):
-    # Get current month data
-    now = timezone.now()
-    current_month = now.replace(day=1)
-    
-    # Get transactions for current month
-    transactions = Transaction.objects.filter(
-        user=request.user,
-        date__gte=current_month,
-        date__lt=current_month.replace(day=1) + timedelta(days=32)
-    ).order_by('-date')
-    
-    # Calculate totals
-    total_income = transactions.filter(category__type='income').aggregate(Sum('amount'))['amount__sum'] or 0
-    total_expense = transactions.filter(category__type='expense').aggregate(Sum('amount'))['amount__sum'] or 0
-    balance = total_income - total_expense
-    
-    # Get recent transactions
-    recent_transactions = transactions[:10]
-    
-    # Get categories for quick add
-    categories = Category.objects.all()
+    try:
+        # Get current month data
+        now = timezone.now()
+        current_month = now.replace(day=1)
+        
+        # Get transactions for current month
+        transactions = Transaction.objects.filter(
+            user=request.user,
+            date__gte=current_month,
+            date__lt=current_month.replace(day=1) + timedelta(days=32)
+        ).order_by('-date')
+        
+        # Calculate totals
+        total_income = transactions.filter(category__type='income').aggregate(Sum('amount'))['amount__sum'] or 0
+        total_expense = transactions.filter(category__type='expense').aggregate(Sum('amount'))['amount__sum'] or 0
+        balance = total_income - total_expense
+        
+        # Get recent transactions
+        recent_transactions = transactions[:10]
+        
+        # Get categories for quick add
+        categories = Category.objects.all()
+        
+    except Exception as e:
+        # Handle database errors (e.g., missing tables)
+        messages.error(request, f'Database error: {str(e)}. Please check your database configuration.')
+        total_income = 0
+        total_expense = 0
+        balance = 0
+        recent_transactions = []
+        categories = []
+        current_month = now
     
     context = {
         'total_income': total_income,
