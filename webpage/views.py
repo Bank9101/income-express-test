@@ -92,20 +92,28 @@ def dashboard(request):
 
 @login_required
 def transactions(request):
-    transactions_list = Transaction.objects.filter(user=request.user).order_by('-date')
-    
-    # Filter by type
-    transaction_type = request.GET.get('type')
-    if transaction_type:
-        transactions_list = transactions_list.filter(category__type=transaction_type)
-    
-    # Filter by date range
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    if start_date:
-        transactions_list = transactions_list.filter(date__gte=start_date)
-    if end_date:
-        transactions_list = transactions_list.filter(date__lte=end_date)
+    try:
+        transactions_list = Transaction.objects.filter(user=request.user).order_by('-date')
+        
+        # Filter by type
+        transaction_type = request.GET.get('type')
+        if transaction_type:
+            transactions_list = transactions_list.filter(category__type=transaction_type)
+        
+        # Filter by date range
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        if start_date:
+            transactions_list = transactions_list.filter(date__gte=start_date)
+        if end_date:
+            transactions_list = transactions_list.filter(date__lte=end_date)
+            
+    except Exception as e:
+        messages.error(request, f'Database error: {str(e)}. Please check your database configuration.')
+        transactions_list = []
+        transaction_type = None
+        start_date = None
+        end_date = None
     
     context = {
         'transactions': transactions_list,
@@ -117,15 +125,20 @@ def transactions(request):
 
 @login_required
 def add_transaction(request):
-    if request.method == 'POST':
-        form = TransactionForm(request.POST)
-        if form.is_valid():
-            transaction = form.save(commit=False)
-            transaction.user = request.user
-            transaction.save()
-            messages.success(request, 'เพิ่มรายการสำเร็จ!')
-            return redirect('transactions')
-    else:
+    try:
+        if request.method == 'POST':
+            form = TransactionForm(request.POST)
+            if form.is_valid():
+                transaction = form.save(commit=False)
+                transaction.user = request.user
+                transaction.save()
+                messages.success(request, 'เพิ่มรายการสำเร็จ!')
+                return redirect('transactions')
+        else:
+            form = TransactionForm()
+            
+    except Exception as e:
+        messages.error(request, f'Database error: {str(e)}. Please check your database configuration.')
         form = TransactionForm()
     
     context = {
@@ -164,14 +177,20 @@ def delete_transaction(request, pk):
 
 @login_required
 def categories(request):
-    categories_list = Category.objects.all()
-    if request.method == 'POST':
-        form = CategoryForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'เพิ่มหมวดหมู่สำเร็จ!')
-            return redirect('categories')
-    else:
+    try:
+        categories_list = Category.objects.all()
+        if request.method == 'POST':
+            form = CategoryForm(request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'เพิ่มหมวดหมู่สำเร็จ!')
+                return redirect('categories')
+        else:
+            form = CategoryForm()
+            
+    except Exception as e:
+        messages.error(request, f'Database error: {str(e)}. Please check your database configuration.')
+        categories_list = []
         form = CategoryForm()
     
     context = {
