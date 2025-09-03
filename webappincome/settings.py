@@ -79,24 +79,16 @@ WSGI_APPLICATION = 'webappincome.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# ใช้ PostgreSQL สำหรับ production (Vercel) และ SQLite สำหรับ local development
-if os.environ.get('VERCEL_ENV') or os.environ.get('DATABASE_URL'):
-    # Production database (PostgreSQL)
-    DATABASES = {
-        'default': dj_database_url.config(
-            default='postgresql://postgres.jcycobkzohrufmonwtko:0954852404@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres',
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
+DATABASES = {
+    'default': {
+        'ENGINE':   'django.db.backends.postgresql',
+        'NAME':     'postgres',
+        'USER':     'postgres.jcycobkzohrufmonwtko',
+        'PASSWORD': '0954852404',
+        'HOST':     'aws-1-ap-southeast-1.pooler.supabase.com',
+        'PORT':     '5432',
     }
-else:
-    # Local development database (SQLite)
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
 
 # Password validation
